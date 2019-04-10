@@ -12,6 +12,8 @@ if [ ! -d $CMK_LOCALDIR ]; then
 fi
 
 cp qgm_check_unifi $CMK_LOCALDIR/qgm_check_unifi
+
+mkdir -p /usr/local/lib/qgm_check_unifi/
 cp unifi_api /usr/local/lib/qgm_check_unifi/unifi_api
 
 if [ ! -f /etc/qgm_check_unifi.conf ]; then 
