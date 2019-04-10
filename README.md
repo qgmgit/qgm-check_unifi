@@ -35,5 +35,5 @@ Running the command on the unifi controller host should give you something like 
 Now you can refresh the services of your unifi controller host in the webUI of Check_Mk and you get the new services in your inventory.
 
 
-
+![Screenshot of check_mk](https://github.com/qgmgit/qgm-check_unifi/raw/master/readme/screenshot01.png)
 
