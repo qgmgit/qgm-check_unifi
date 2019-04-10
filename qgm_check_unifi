@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+
+# Source the config with the credentials
+. /etc/qgm_check_unifi.conf
+
+# Source the ubiquiti API functions
+. /usr/local/lib/qgm_check_unifi/unifi_api
+
+
+# FIXME source the credentials (or get it via cli)
+
+
+# Functions
+
+getValue() {
+	SERIAL=$1
+	QUERY=$2
+
+	Q1=" .data | .[] | select(.serial | contains($SERIAL))"
+	Q2=" $QUERY "
+
+	local VALUE=$(cat $TEMPSTATS | jq "$Q1" | jq $Q2)
+    echo $VALUE
+}
+
+# create temp file
+TEMPSTATS=/tmp/cuc_$$
+rm -f $TEMPSTATS
+touch $TEMPSTATS
+chmod 600 $TEMPSTATS
+
+# get infos from unifi controller
+unifi_requires
+unifi_login > /dev/null
+unifi_list_devices > $TEMPSTATS 
+unifi_logout
+
+
+SERIALS=$(cat $TEMPSTATS | jq '.data | .[] | .serial')
+
+# iterate over the acquired serials
+for S in $SERIALS; do
+
+    DEVICE_NAME=$(getValue $S .name | sed -e 's/"//g')
+    DEVICE_IP=$(getValue $S .connect_request_ip | sed -e 's/"//g')
+    DEVICE_TYPE=$(getValue $S .type | sed -e 's/"//g')
+    CHECK_NAME=${DEVICE_TYPE}_$(getValue $S .serial | sed -e 's/"//g')
+    DEVICE_MODEL=$(getValue $S .model | sed -e 's/"//g')
+    DEVICE_IP_TYPE=$(getValue $S .config_network.type | sed -e 's/"//g')
+
+    CLIENTS=$(getValue $S .num_sta )
+    
+    LOAD1=$(getValue $S .sys_stats.loadavg_1 | sed -e 's/"//g' )
+    LOAD5=$(getValue $S .sys_stats.loadavg_5 | sed -e 's/"//g' )
+    LOAD15=$(getValue $S .sys_stats.loadavg_15 | sed -e 's/"//g' )
+
+    STATE=$(getValue $S .state)
+    
+    STATUS=3
+    if [ $STATE -eq 1 ]; then 
+        STATUS=0
+    else 
+        STATUS=1
+    fi
+    echo "$STATUS $CHECK_NAME load1=$LOAD1|load5=$LOAD5|load15=$LOAD15|num_clients=$CLIENTS $DEVICE_NAME ($DEVICE_MODEL/$DEVICE_IP/$DEVICE_IP_TYPE)"
+
+
+
+done
+
+
+
+# clean up
+rm -f $TEMPSTATS
+
+
