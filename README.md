@@ -9,7 +9,7 @@ Local Check for check_mk to get information about unifi infrastructure from cont
 
 ## Installation 
 
-* Clone the Repo: ``git clone ``
+* Clone the Repo: ``git clone https://github.com/qgmgit/qgm-check_unifi.git``
 * Run ./install -- this will 
   * Copy the check-script to the check_mk-agents local directory
   * Copy the API-library to ``/usr/local/lib/qgm_check_unifi/unifi_api``
