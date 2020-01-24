@@ -37,6 +37,7 @@ unifi_login() {
 unifi_logout() {
     # logout
     ${curl_cmd} $baseurl/logout
+    rm ${cookie}
 }
 
 unifi_api() {
